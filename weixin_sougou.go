@@ -14,6 +14,9 @@ import (
 	"time"
 )
 
+const BaseURL = "http://weixin.sogou.com"
+const queryURL = "/gzhjs?"
+
 type QueryElement struct {
 	name   string
 	cb     string
@@ -50,9 +53,6 @@ func (p *DisplayXml) String() string {
 	return fmt.Sprintf("  Title: %s\n  URL: %s\n  Content: %s\n  Date: %s\n",
 		p.Title, p.Url, p.Content, p.Date)
 }
-
-var BaseURL = "http://weixin.sogou.com"
-var queryURL = "/gzhjs?"
 
 var zhiJapanQuery = QueryElement{
 	name:   "知日",

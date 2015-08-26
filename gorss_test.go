@@ -10,7 +10,7 @@ import (
 
 func Test_GenerateFeed(t *testing.T) {
 	fmt.Printf("test GenerateFeed\n")
-	gorss.GenerateFeed(nil, os.Stdout, "zhi_japan")
+	gorss.GenerateFeed(nil, os.Stdout, 0)
 }
 
 /*

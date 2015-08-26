@@ -10,22 +10,20 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 )
 
+/*
+ * the query page of weixin_sougou is a json data, which includes
+ * a xml data containg these entries for each essays.
+ * So, PageJson's Items are xml data for each entry, which is presented by
+ * EntryXml.
+ * In EntryXml, we just fetch these elements we need. These elements presented
+ * by DisplayXml are in the <Display> tag.
+ */
+
 const BaseURL = "http://weixin.sogou.com"
 const queryURL = "/gzhjs?"
-
-type QueryElement struct {
-	name   string
-	cb     string
-	openid string
-	eqs    string
-	ekv    string
-	page   string
-	t      string
-}
 
 type PageJson struct {
 	TotalItems int      `json:"totalItems"`
@@ -49,23 +47,10 @@ type DisplayXml struct {
 	Date    string `xml:"date"`
 }
 
+// for printf %v
 func (p *DisplayXml) String() string {
 	return fmt.Sprintf("  Title: %s\n  URL: %s\n  Content: %s\n  Date: %s\n",
 		p.Title, p.Url, p.Content, p.Date)
-}
-
-var zhiJapanQuery = QueryElement{
-	name:   "知日",
-	cb:     "sogou.weixin.gzhcb",
-	openid: "oIWsFt3YfRKPuRZmMDZAdlPJgIPU",
-	eqs:    "vVszo3Bguw%2BpoUyfUb7gSu7N7CSPLLzqm1DpF5tvTnfaP1JKRtX%2BIxaW3PH%2BFZuKmHrTW",
-	ekv:    "3",
-	page:   "1",
-	t:      "1440596043703",
-}
-
-var idQueryMap = map[string]*QueryElement{
-	"zhi_japan": &zhiJapanQuery,
 }
 
 func (q *QueryElement) buildURL() string {
@@ -73,46 +58,40 @@ func (q *QueryElement) buildURL() string {
 		BaseURL, queryURL, q.cb, q.openid, q.eqs, q.ekv, q.page, q.t)
 }
 
-// TODO
-func FetchOpenID(id string) string {
-	return fmt.Sprintf("%s_openid", id)
-}
-
-func NewFeed(id string) (*feeds.Feed, error) {
+func NewFeed(index int) (*feeds.Feed, error) {
+	q := IDQuerys[index]
 	feed := &feeds.Feed{
-		Title:       idQueryMap[id].name + "-公众号RSS",
-		Link:        &feeds.Link{Href: "http://gorss-1047.appspot.com/"}, // TODO
-		Description: "Description(TODO)",
-		Author:      &feeds.Author{"Author(TODO)", "TODO@TODO.com"},
+		Title:       q.name + "-公众号RSS",
+		Link:        &feeds.Link{Href: "http://gorss-1047.appspot.com/" + q.id + "_rss"},
+		Description: "GORSS feed for " + q.name,
+		Author:      &feeds.Author{q.id, ""},
 		Created:     time.Now(),
 	}
 
 	return feed, nil
 }
 
-func getSavePage(url, filename string) {
-	data, err := getPage(nil, url)
-	if err != nil {
-		return
-	}
-	saveFile(data, filename)
-}
+func FetchList(client *http.Client, index int) ([]*feeds.Item, error) {
+	query := IDQuerys[index]
+	url := query.buildURL()
 
-func saveFile(data []byte, filename string) {
-	f, err1 := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
-	if err1 != nil {
-		return
+	data, err := getPage(client, url)
+	if err != nil {
+		fmt.Printf("getPage failed: %v\n", err)
+		return nil, err
 	}
-	defer f.Close()
-	f.WriteString(string(data[:len(data)]))
+
+	return parsePage(data)
 }
 
 func getPage(client *http.Client, url string) ([]byte, error) {
 	var res *http.Response
 	var err error
 	if client == nil {
+		// use http package's default client
 		res, err = http.Get(url)
 	} else {
+		// use GAE's http client
 		res, err = client.Get(url)
 	}
 	if err != nil {
@@ -130,6 +109,24 @@ func getPage(client *http.Client, url string) ([]byte, error) {
 	return data, nil
 }
 
+func parsePage(data []byte) ([]*feeds.Item, error) {
+	var page PageJson
+	data = fetchJsonBody(data)
+	err := json.Unmarshal(data, &page)
+	if err != nil {
+		fmt.Printf("json page unmarshal failed: %v\n", err)
+		return nil, err
+	}
+
+	items := make([]*feeds.Item, len(page.Items))
+	for i, item := range page.Items {
+		items[i] = parseItemXml(item)
+	}
+
+	return items, nil
+}
+
+// skip some charactors
 func fetchJsonBody(data []byte) []byte {
 	i := bytes.IndexByte(data, '}')
 	return data[5 : i+1]
@@ -138,17 +135,12 @@ func fetchJsonBody(data []byte) []byte {
 func parseItemXml(str string) *feeds.Item {
 	var entry EntryXml
 
-	/*
-		data := []byte(str)
-		err := xml.Unmarshal(data, &entry)
-	*/
-
+	// change from gbk to utf8
 	d := xml.NewDecoder(bytes.NewReader([]byte(str)))
 	d.CharsetReader = func(s string, r io.Reader) (io.Reader, error) {
 		return charset.NewReader(r, s)
 	}
 	err := d.Decode(&entry)
-
 	if err != nil {
 		fmt.Printf("xml entryXml unmarshal failed: %v\n", err)
 		return nil
@@ -161,43 +153,4 @@ func parseItemXml(str string) *feeds.Item {
 		Description: entry.Item.Display.Content,
 		Created:     now,
 	}
-}
-
-func ParsePage(data []byte) ([]*feeds.Item, error) {
-	var listInfo PageJson
-	data = fetchJsonBody(data)
-	//err = json.NewDecoder(data).Decode(&listInfo)
-	err := json.Unmarshal(data, &listInfo)
-	if err != nil {
-		fmt.Printf("json page unmarshal failed: %v\n", err)
-		return nil, err
-	}
-
-	feedItems := make([]*feeds.Item, len(listInfo.Items))
-	for i, item := range listInfo.Items {
-		feedItems[i] = parseItemXml(item)
-	}
-
-	return feedItems, nil
-}
-
-func FetchList(client *http.Client, id string, feed *feeds.Feed) error {
-	query := idQueryMap[id]
-	url := query.buildURL()
-
-	data, err := getPage(client, url)
-	if err != nil {
-		fmt.Printf("getPage failed: %v\n", err)
-		return err
-	}
-
-	// For test
-	saveFile(data, "zhiJapan.html")
-
-	feed.Items, err = ParsePage(data)
-	if err != nil {
-		fmt.Printf("ParsePage failed: %v\n", err)
-		return err
-	}
-	return nil
 }

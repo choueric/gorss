@@ -8,7 +8,7 @@ information about the gzh by yourself manually, such as openID, eqs, etc.
 
 This job will be added to GoRSS later, someday, maybe, who knowns.
 
-After adding new feed and deployint to GAE, you can see the feed in the URL:
+After adding new feed and deploying to GAE, you can see the feed in the URL:
 
 ```
 http://appid.appspot.com/gzhid_rss

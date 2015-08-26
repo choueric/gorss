@@ -15,6 +15,7 @@ import (
 )
 
 type QueryElement struct {
+	name   string
 	cb     string
 	openid string
 	eqs    string
@@ -63,6 +64,7 @@ var testQuery = QueryElement{
 }
 
 var zhiJapanQuery = QueryElement{
+	name:   "知日",
 	cb:     "sogou.weixin.gzhcb",
 	openid: "oIWsFt3YfRKPuRZmMDZAdlPJgIPU",
 	eqs:    "vVszo3Bguw%2BpoUyfUb7gSu7N7CSPLLzqm1DpF5tvTnfaP1JKRtX%2BIxaW3PH%2BFZuKmHrTW",
@@ -87,7 +89,7 @@ func FetchOpenID(id string) string {
 
 func NewFeed(id string) (*feeds.Feed, error) {
 	feed := &feeds.Feed{
-		Title:       id + "-公众号RSS",
+		Title:       idQueryMap[id].name + "-公众号RSS",
 		Link:        &feeds.Link{Href: "http://gorss-1047.appspot.com/"}, // TODO
 		Description: "Description(TODO)",
 		Author:      &feeds.Author{"Author(TODO)", "TODO@TODO.com"},
@@ -98,7 +100,7 @@ func NewFeed(id string) (*feeds.Feed, error) {
 }
 
 func getSavePage(url, filename string) {
-	data, err := getPage(url)
+	data, err := getPage(nil, url)
 	if err != nil {
 		return
 	}
@@ -114,8 +116,14 @@ func saveFile(data []byte, filename string) {
 	f.WriteString(string(data[:len(data)]))
 }
 
-func getPage(url string) ([]byte, error) {
-	res, err := http.Get(url)
+func getPage(client *http.Client, url string) ([]byte, error) {
+	var res *http.Response
+	var err error
+	if client == nil {
+		res, err = http.Get(url)
+	} else {
+		res, err = client.Get(url)
+	}
 	if err != nil {
 		fmt.Printf("get page failed: %v\n", err)
 		return nil, err
@@ -182,11 +190,11 @@ func ParsePage(data []byte) ([]*feeds.Item, error) {
 	return feedItems, nil
 }
 
-func FetchList(id string, feed *feeds.Feed) error {
+func FetchList(client *http.Client, id string, feed *feeds.Feed) error {
 	query := idQueryMap[id]
 	url := query.buildURL()
 
-	data, err := getPage(url)
+	data, err := getPage(client, url)
 	if err != nil {
 		fmt.Printf("getPage failed: %v\n", err)
 		return err

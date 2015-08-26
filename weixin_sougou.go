@@ -54,15 +54,6 @@ func (p *DisplayXml) String() string {
 var BaseURL = "http://weixin.sogou.com"
 var queryURL = "/gzhjs?"
 
-var testQuery = QueryElement{
-	cb:     "sogou.weixin.gzhcb",
-	openid: "oIWsFt4FQp3Tc4r4sLVZRGm1KJOU",
-	eqs:    "ZJsloj4g3uZ9oQ%2FBlrplFuGasrzeFzAmuGhptXELKtCPyTaR30ZNd0Z6NcN8fENww%2FDaa",
-	ekv:    "7",
-	page:   "1",
-	t:      "1436829801885",
-}
-
 var zhiJapanQuery = QueryElement{
 	name:   "知日",
 	cb:     "sogou.weixin.gzhcb",

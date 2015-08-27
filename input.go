@@ -24,4 +24,14 @@ var IDQuerys = []*QueryElement{
 		page:   "1",
 		t:      "1440596043703",
 	},
+	&QueryElement{
+		id:     "tangsuanradio1",
+		name:   "糖蒜",
+		openid: "oIWsFt0V3S77VQmPDEUVM3OgJ8U0",
+		eqs:    "hYs%2BoczgX0z4o8eNltmdCuL4cX2dCZVN%2B%2F4FAA2wxRQcTpeEYSpNSmA6BJif3QPOB6qhQ",
+		cb:     "sogou.weixin.gzhcb",
+		ekv:    "3",
+		page:   "1",
+		t:      "1440678777024",
+	},
 }

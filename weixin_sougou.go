@@ -77,6 +77,7 @@ func NewFeed(index int) (*feeds.Feed, error) {
 
 func FetchList(client *http.Client, index int) ([]*feeds.Item, error) {
 	query := IDQuerys[index]
+	query.t = strconv.FormatInt(time.Now().Unix(), 10)
 	url := query.buildURL()
 
 	data, err := getPage(client, url)

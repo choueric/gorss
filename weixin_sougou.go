@@ -10,6 +10,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -45,6 +46,9 @@ type DisplayXml struct {
 	Url     string `xml:"url"`
 	Content string `xml:"content"`
 	Date    string `xml:"date"`
+	Docid   string `xml:"docid"`
+	Source  string `xml:"sourcename"`
+	Update  string `xml:"lastModified"`
 }
 
 // for printf %v
@@ -63,9 +67,9 @@ func NewFeed(index int) (*feeds.Feed, error) {
 	feed := &feeds.Feed{
 		Title:       q.name + "-公众号RSS",
 		Link:        &feeds.Link{Href: "http://gorss-1047.appspot.com/" + q.id + "_rss"},
-		Description: "GORSS feed for " + q.name,
+		Description: "GoRSS feed for " + q.name,
 		Author:      &feeds.Author{q.id, ""},
-		Created:     time.Now(),
+		Updated:     time.Now(),
 	}
 
 	return feed, nil
@@ -146,11 +150,18 @@ func parseItemXml(str string) *feeds.Item {
 		return nil
 	}
 
-	now := time.Now()
 	return &feeds.Item{
 		Title:       entry.Item.Display.Title,
 		Link:        &feeds.Link{Href: entry.Item.Display.Url},
 		Description: entry.Item.Display.Content,
-		Created:     now,
+		Id:          entry.Item.Display.Docid,
+		Author:      &feeds.Author{Name: entry.Item.Display.Source},
+		//Created:     entry.Item.Display.Date,
+		Updated: modifyTime(entry.Item.Display.Update),
 	}
+}
+
+func modifyTime(ts string) time.Time {
+	t, _ := strconv.ParseInt(ts, 10, 64)
+	return time.Unix(t, 0)
 }

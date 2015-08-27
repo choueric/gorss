@@ -9,26 +9,78 @@ type QueryElement struct {
 	cb     string // fixed
 	ekv    string // fixed
 	page   string // fixed
-	t      string // fixed
+	t      string
 }
 
 // add new RSS here
 var IDQuerys = []*QueryElement{
+	/*
+		&QueryElement{
+			id:     "zhi_japan",
+			name:   "知日",
+			openid: "oIWsFt3YfRKPuRZmMDZAdlPJgIPU",
+			eqs:    "vVszo3Bguw%2BpoUyfUb7gSu7N7CSPLLzqm1DpF5tvTnfaP1JKRtX%2BIxaW3PH%2BFZuKmHrTW",
+			cb:     "sogou.weixin.gzhcb",
+			ekv:    "3",
+			page:   "1",
+			t:      "1440596043703",
+		},
+	*/
 	&QueryElement{
-		id:     "zhi_japan",
-		name:   "知日",
-		openid: "oIWsFt3YfRKPuRZmMDZAdlPJgIPU",
-		eqs:    "vVszo3Bguw%2BpoUyfUb7gSu7N7CSPLLzqm1DpF5tvTnfaP1JKRtX%2BIxaW3PH%2BFZuKmHrTW",
+		id:     "seekingbeta_earl",
+		name:   "earletf",
+		openid: "oIWsFt2WedIo0nqhDIeHAEazr7Vw",
+		eqs:    "43sQoeuglO7EobHMZZaQvuTvFqL8H8xqIXx52SOvhJPxUqP29e1rV1S%2B%2BunSk2bTuXoDE",
 		cb:     "sogou.weixin.gzhcb",
 		ekv:    "3",
 		page:   "1",
-		t:      "1440596043703",
+		t:      "1440678777024",
 	},
 	&QueryElement{
-		id:     "tangsuanradio1",
-		name:   "糖蒜",
-		openid: "oIWsFt0V3S77VQmPDEUVM3OgJ8U0",
-		eqs:    "hYs%2BoczgX0z4o8eNltmdCuL4cX2dCZVN%2B%2F4FAA2wxRQcTpeEYSpNSmA6BJif3QPOB6qhQ",
+		id:     "seniorplayer",
+		name:   "大玩家张磊",
+		openid: "oIWsFt3sSJFYcdEcqQeePTe55UEM",
+		eqs:    "tvsGofAgS%2F0Xoeo2TnXHnuBdq2l1gU5LIn8NyrRsfRDyd4qp6IJThHRVst9kKHCBPW9c3",
+		cb:     "sogou.weixin.gzhcb",
+		ekv:    "3",
+		page:   "1",
+		t:      "1440678777024",
+	},
+	&QueryElement{
+		id:     "etfhefenji",
+		name:   "ETF和分级圈",
+		openid: "oIWsFtz7JJpbnCAaoFXDp-DIQ5LQ",
+		eqs:    "HVsGouugIb%2B4oY6QbnUjQuLcOPTseRudnhX4bEmQYtYb%2F879npHpvYjisFtzZ2CLZm8wp",
+		cb:     "sogou.weixin.gzhcb",
+		ekv:    "3",
+		page:   "1",
+		t:      "1440678777024",
+	},
+	&QueryElement{
+		id:     "IELTS_Online2015",
+		name:   "IELTS在线",
+		openid: "oIWsFt_2iP_TI_P6jX1fNgL_SoP4",
+		eqs:    "4UsVoongqtkro%2FEq0%2BWFku43OcFCbbmkxWVcb%2F68zo4V31EteCu3NHqIfUtOVu4n4CCsC",
+		cb:     "sogou.weixin.gzhcb",
+		ekv:    "3",
+		page:   "1",
+		t:      "1440678777024",
+	},
+	&QueryElement{
+		id:     "ilianyue",
+		name:   "连岳",
+		openid: "oIWsFt0e_MEZmRrjEbLsh99_H13E",
+		eqs:    "NtspokCg2stAoCGXiWRp0uJr8VdDfCXoN%2B2KraHab6e9tXh4EQ%2BLrAH8UfuG2occr3kzH",
+		cb:     "sogou.weixin.gzhcb",
+		ekv:    "3",
+		page:   "1",
+		t:      "1440678777024",
+	},
+	&QueryElement{
+		id:     "bitsea",
+		name:   "槽边往事",
+		openid: "oIWsFtxG-2J2sGx3l5-pknZDv60g",
+		eqs:    "busoo9%2Bgtcq6oQsWluIJzuM2p7w6sBt09VL7nn8BrmmYN%2BGKWxdO%2FcAwvEC57oVHNuq7I",
 		cb:     "sogou.weixin.gzhcb",
 		ekv:    "3",
 		page:   "1",

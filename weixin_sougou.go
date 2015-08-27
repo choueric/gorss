@@ -77,9 +77,12 @@ func NewFeed(index int) (*feeds.Feed, error) {
 
 func FetchList(client *http.Client, index int) ([]*feeds.Item, error) {
 	query := IDQuerys[index]
+	query.cb = "sogou.weixin.gzhcb"
+	query.ekv = "3"
+	query.page = "1"
 	query.t = strconv.FormatInt(time.Now().Unix(), 10)
-	url := query.buildURL()
 
+	url := query.buildURL()
 	data, err := getPage(client, url)
 	if err != nil {
 		fmt.Printf("getPage failed: %v\n", err)

@@ -3,6 +3,7 @@ package gorss_test
 import (
 	"fmt"
 	"github.com/choueric/gorss"
+	"net/http"
 	//"io/ioutil"
 	"os"
 	"testing"
@@ -10,7 +11,7 @@ import (
 
 func Test_GenerateFeed(t *testing.T) {
 	fmt.Printf("test GenerateFeed\n")
-	gorss.GenerateFeed(nil, os.Stdout, 0)
+	gorss.GenerateFeed(&http.Client{}, os.Stdout, 0)
 }
 
 /*

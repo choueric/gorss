@@ -83,16 +83,16 @@ func FetchList(client *http.Client, index int) ([]*feeds.Item, error) {
 	query.t = strconv.FormatInt(time.Now().Unix(), 10)
 
 	url := query.buildURL()
-	data, err := getPage(client, url)
+	data, cookies, err := getPage(client, url)
 	if err != nil {
 		fmt.Printf("getPage failed: %v\n", err)
 		return nil, err
 	}
 
-	return parsePage(data)
+	return parsePage(client, cookies, data)
 }
 
-func getPage(client *http.Client, url string) ([]byte, error) {
+func getPage(client *http.Client, url string) ([]byte, []*http.Cookie, error) {
 	var res *http.Response
 	var err error
 	if client == nil {
@@ -104,20 +104,20 @@ func getPage(client *http.Client, url string) ([]byte, error) {
 	}
 	if err != nil {
 		fmt.Printf("get page failed: %v\n", err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	data, err := ioutil.ReadAll(res.Body)
 	res.Body.Close()
 	if err != nil {
 		fmt.Printf("read page body failed: %v\n", err)
-		return nil, err
+		return nil, nil, err
 	}
 
-	return data, nil
+	return data, res.Cookies(), nil
 }
 
-func parsePage(data []byte) ([]*feeds.Item, error) {
+func parsePage(client *http.Client, cookies []*http.Cookie, data []byte) ([]*feeds.Item, error) {
 	var page PageJson
 	data = fetchJsonBody(data)
 	err := json.Unmarshal(data, &page)
@@ -128,7 +128,7 @@ func parsePage(data []byte) ([]*feeds.Item, error) {
 
 	items := make([]*feeds.Item, len(page.Items))
 	for i, item := range page.Items {
-		items[i] = parseItemXml(item)
+		items[i] = parseItemXml(client, cookies, item)
 	}
 
 	return items, nil
@@ -140,8 +140,25 @@ func fetchJsonBody(data []byte) []byte {
 	return data[5 : i+1]
 }
 
-func parseItemXml(str string) *feeds.Item {
+func fetchFeedUrl(client *http.Client, cookies []*http.Cookie, requestUrl string) (string, error) {
+	req, _ := http.NewRequest("GET", requestUrl, nil)
+	for _, c := range cookies {
+		req.AddCookie(c)
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("fetchFeedUrl failed: %v\n", err)
+		return "error url", err
+	}
+
+	return res.Request.URL.String(), nil
+}
+
+func parseItemXml(client *http.Client, cookies []*http.Cookie, str string) *feeds.Item {
 	var entry EntryXml
+
+	/* print the item xml */
+	// fmt.Println(str)
 
 	// change from gbk to utf8
 	d := xml.NewDecoder(bytes.NewReader([]byte(str)))
@@ -154,9 +171,14 @@ func parseItemXml(str string) *feeds.Item {
 		return nil
 	}
 
+	url, err := fetchFeedUrl(client, cookies, BaseURL+entry.Item.Display.Url)
+	if err != nil {
+		return nil
+	}
+
 	return &feeds.Item{
 		Title:       entry.Item.Display.Title,
-		Link:        &feeds.Link{Href: entry.Item.Display.Url},
+		Link:        &feeds.Link{Href: url},
 		Description: entry.Item.Display.Content,
 		Id:          entry.Item.Display.Docid,
 		Author:      &feeds.Author{Name: entry.Item.Display.Source},

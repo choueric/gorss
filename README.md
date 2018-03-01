@@ -7,3 +7,4 @@ various websites' RSS feed via different URLs.
 
 - [ ] test site
 - [ ] configuration file
+- [ ] save the feeds information when exit and reload them when next start

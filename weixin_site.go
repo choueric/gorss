@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/feeds"
 	"golang.org/x/net/html/charset"
@@ -133,7 +134,7 @@ func parseItemXml(client *http.Client, str string) *feeds.Item {
 		Description: entry.Item.Display.Content,
 		Id:          entry.Item.Display.Docid,
 		Author:      &feeds.Author{Name: entry.Item.Display.Source},
+		Updated:     time.Now(),
 		//Created:     entry.Item.Display.Date,
-		Updated: modifyTime(entry.Item.Display.Update),
 	}
 }

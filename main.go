@@ -8,20 +8,29 @@ import (
 	"github.com/choueric/clog"
 )
 
-func init() {
-}
-
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Hello, this is gorss!\n"+
 		"Maybe this path dose not exist!\n"+
-		"Please go to the specificed path for rss.\n")
+		"Please go to the right path for the target site.\n")
 }
 
 func siteHandler(w http.ResponseWriter, r *http.Request) {
 	siteName := r.URL.Path[1:]
 	clog.Printf("Site name: %s\n", siteName)
 
-	feed, err := feedNew(siteName)
+	site, err := siteMapFind(siteName)
+	if err != nil {
+		fmt.Fprintf(w, "error %v\n", err)
+		return
+	}
+
+	feed, err := site.newFeed()
+	if err != nil {
+		fmt.Fprintf(w, "error %v\n", err)
+		return
+	}
+
+	feed.Items, err = site.fetchItems()
 	if err != nil {
 		fmt.Fprintf(w, "error %v\n", err)
 		return
@@ -37,7 +46,10 @@ func siteHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/aacfree", siteHandler)
+	http.HandleFunc("/test", siteHandler)
+
+	siteMap = make(map[string]rssSiter)
+	siteMapAdd("test", &test)
 
 	port := ":2888"
 	fmt.Printf("start listen at %v ...\n", port)

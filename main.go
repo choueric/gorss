@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/choueric/clog"
@@ -47,11 +46,13 @@ func siteHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/test", siteHandler)
+	http.HandleFunc("/aacfree", siteHandler)
 
 	siteMap = make(map[string]rssSiter)
 	siteMapAdd("test", &test)
+	siteMapAdd("aacfree", &aacfree)
 
 	port := ":2888"
-	fmt.Printf("start listen at %v ...\n", port)
-	log.Fatal(http.ListenAndServe(port, nil))
+	clog.Printf("start listen at %v ...\n", port)
+	clog.Fatal(http.ListenAndServe(port, nil))
 }

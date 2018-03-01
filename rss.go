@@ -1,4 +1,4 @@
-package gorss
+package main
 
 import (
 	"fmt"

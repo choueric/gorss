@@ -1,17 +1,18 @@
-package gorss
+package main
 
 import (
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"github.com/gorilla/feeds"
-	"golang.org/x/net/html/charset"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/feeds"
+	"golang.org/x/net/html/charset"
 )
 
 /*
@@ -82,8 +83,9 @@ func FetchList(client *http.Client, index int) ([]*feeds.Item, error) {
 	query.page = "1"
 	query.t = strconv.FormatInt(time.Now().Unix(), 10)
 
-	url := query.buildURL()
-	data, cookies, err := getPage(client, url)
+	//url := query.buildURL()
+	//data, cookies, err := getPage(client, url)
+	data, cookies, err := getPage(client, "http://weixin.sogou.com/gzhjs?openid=oIWsFt3YfRKPuRZmMDZAdlPJgIPU&ext=BwNJn-VLvvM2uQTHuAWxpiwP_z7kpwLtYjjpS0k7C6ht2K0pBRP7tc6JqkIVWJUT&cb=sogou.weixin_gzhcb&page=1&gzhArtKeyWord=&tsn=0&t=1449563717585&_=1449563717518")
 	if err != nil {
 		fmt.Printf("getPage failed: %v\n", err)
 		return nil, err
@@ -117,8 +119,10 @@ func getPage(client *http.Client, url string) ([]byte, []*http.Cookie, error) {
 	return data, res.Cookies(), nil
 }
 
+/* parse page data from URL */
 func parsePage(client *http.Client, cookies []*http.Cookie, data []byte) ([]*feeds.Item, error) {
 	var page PageJson
+
 	data = fetchJsonBody(data)
 	err := json.Unmarshal(data, &page)
 	if err != nil {
@@ -137,7 +141,7 @@ func parsePage(client *http.Client, cookies []*http.Cookie, data []byte) ([]*fee
 // skip some charactors
 func fetchJsonBody(data []byte) []byte {
 	i := bytes.IndexByte(data, '}')
-	return data[5 : i+1]
+	return data[19 : i+1]
 }
 
 func fetchFeedUrl(client *http.Client, cookies []*http.Cookie, requestUrl string) (string, error) {
@@ -158,7 +162,9 @@ func parseItemXml(client *http.Client, cookies []*http.Cookie, str string) *feed
 	var entry EntryXml
 
 	/* print the item xml */
-	// fmt.Println(str)
+	fmt.Println(str)
+
+	return nil
 
 	// change from gbk to utf8
 	d := xml.NewDecoder(bytes.NewReader([]byte(str)))

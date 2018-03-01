@@ -1,28 +1,56 @@
 package main
 
 import (
-	"fmt"
-	"io"
-	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/gorilla/feeds"
 )
 
-func GenerateFeed(client *http.Client, w io.Writer, index int) {
-	feed, err := NewFeed(index)
-	if err != nil {
-		fmt.Fprintf(w, "NewFeed failed: %v\n", err)
-		return
+// const webUrl = "http://ericnode.info"
+const webUrl = "127.0.0.1"
+
+func modifyTime(ts string) time.Time {
+	t, _ := strconv.ParseInt(ts, 10, 64)
+	return time.Unix(t, 0)
+}
+
+func feedNewItem() *feeds.Item {
+	return &feeds.Item{
+		Title:       "feed item title",
+		Link:        &feeds.Link{Href: "127.0.0.1/feed_item_link"},
+		Description: "feed item description",
+		Id:          "feed item ID",
+		Author:      &feeds.Author{Name: "feed item author"},
+		Created:     time.Now(),
+		Updated:     time.Now(),
+	}
+}
+
+func getItems(feed *feeds.Feed, title string) error {
+	itemNum := 10
+	feed.Items = make([]*feeds.Item, itemNum)
+
+	for i := 0; i < 10; i++ {
+		feed.Items[i] = feedNewItem()
+	}
+	return nil
+}
+
+func feedNew(title string) (*feeds.Feed, error) {
+	feed := &feeds.Feed{
+		Title:       title + "_RSS",
+		Id:          "TODO",
+		Link:        &feeds.Link{Href: webUrl + "/" + title},
+		Description: "GoRSS feed for " + title,
+		Author:      &feeds.Author{"TODO", ""},
+		Updated:     time.Now(),
 	}
 
-	feed.Items, err = FetchList(client, index)
+	err := getItems(feed, title)
 	if err != nil {
-		fmt.Fprintf(w, "FetchList failed: %v\n", err)
-		return
+		return nil, err
 	}
 
-	atom, err := feed.ToAtom()
-	if err != nil {
-		fmt.Fprintf(w, "error %v\n", err)
-		return
-	}
-	fmt.Fprint(w, atom)
+	return feed, nil
 }

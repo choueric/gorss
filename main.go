@@ -1,10 +1,11 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/choueric/clog"
 )
 
 func init() {
@@ -16,33 +17,27 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		"Please go to the specificed path for rss.\n")
 }
 
-func idHandler(w http.ResponseWriter, r *http.Request) {
-	/*
-		c := appengine.NewContext(r)
-		client := urlfetch.Client(c)
-		id := r.URL.Path[1 : len(r.URL.Path)-4]
-		index, err := getIndexFromQuerys(id)
-		if err != nil {
-			fmt.Fprintf(w, "error: %v\n")
-			return
-		}
-		GenerateFeed(client, w, index)
-	*/
-	fmt.Fprintf(w, "feed name: %s\n", r.URL.Path)
-}
+func siteHandler(w http.ResponseWriter, r *http.Request) {
+	siteName := r.URL.Path[1:]
+	clog.Printf("Site name: %s\n", siteName)
 
-func getIndexFromQuerys(id string) (int, error) {
-	for i, v := range IDQuerys {
-		if id == v.id {
-			return i, nil
-		}
+	feed, err := feedNew(siteName)
+	if err != nil {
+		fmt.Fprintf(w, "error %v\n", err)
+		return
 	}
-	return -1, errors.New("not find match id in QueryArray")
+
+	atom, err := feed.ToAtom()
+	if err != nil {
+		fmt.Fprintf(w, "error %v\n", err)
+		return
+	}
+	fmt.Fprint(w, atom)
 }
 
 func main() {
 	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/aacfree", idHandler)
+	http.HandleFunc("/aacfree", siteHandler)
 
 	port := ":2888"
 	fmt.Printf("start listen at %v ...\n", port)

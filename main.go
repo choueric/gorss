@@ -35,12 +35,12 @@ func siteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	atom, err := feed.ToAtom()
+	page, err := feed.ToRss()
 	if err != nil {
 		fmt.Fprintf(w, "error %v\n", err)
 		return
 	}
-	fmt.Fprint(w, atom)
+	fmt.Fprint(w, page)
 }
 
 func main() {

@@ -43,9 +43,9 @@ func (s *aacfreeSite) newFeed() (*feeds.Feed, error) {
 	if s.feed == nil {
 		s.feed = &feeds.Feed{
 			Title:       s.title(),
-			Link:        &feeds.Link{Href: "https://www.aacfree.com"},
+			Link:        &feeds.Link{Href: "https://www.aacfree.com/"},
 			Description: s.title(),
-			Author:      &feeds.Author{"aacfree", "no email"},
+			Author:      &feeds.Author{Name: "aacfree"},
 			Updated:     time.Now(),
 			Created:     time.Now(),
 		}
@@ -72,13 +72,10 @@ func (s *aacfreeSite) fetchItems() ([]*feeds.Item, error) {
 			Description: "aacfree",
 		}
 
-		if id, ok := s.Attr("id"); ok {
-			item.Id = id
-		}
-
 		if a := s.Find("h2").Find("a"); a != nil {
 			if href, ok := a.Attr("href"); ok {
 				item.Link = &feeds.Link{Href: href}
+				item.Id = href
 			}
 		}
 
@@ -95,7 +92,7 @@ func (s *aacfreeSite) fetchItems() ([]*feeds.Item, error) {
 					if r, ok := s.Attr("datetime"); ok {
 						v, err := time.Parse(time.RFC3339, r)
 						if err == nil {
-							item.Created = v
+							// item.Created = v
 							item.Updated = v
 						}
 					}

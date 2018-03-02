@@ -45,7 +45,7 @@ func (s *aacfreeSite) newFeed() (*feeds.Feed, error) {
 			Title:       s.title(),
 			Link:        &feeds.Link{Href: "https://www.aacfree.com/"},
 			Description: s.title(),
-			Author:      &feeds.Author{Name: "aacfree"},
+			Author:      &feeds.Author{"aacfree", "aacfree@demo.com"},
 			Updated:     time.Now(),
 			Created:     time.Now(),
 		}
@@ -68,7 +68,7 @@ func (s *aacfreeSite) fetchItems() ([]*feeds.Item, error) {
 	sel := bow.Find("article")
 	sel.Each(func(_ int, s *goquery.Selection) {
 		item := &feeds.Item{
-			Author:      &feeds.Author{Name: "aacfree"},
+			Author:      &feeds.Author{"aacfree", "aacfree@demo.com"},
 			Description: "aacfree",
 		}
 

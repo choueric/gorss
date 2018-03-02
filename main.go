@@ -44,13 +44,17 @@ func siteHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	const (
+		testUrlPath = "test.xml"
+		aacUrlPath  = "aacfree.xml"
+	)
 	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/test", siteHandler)
-	http.HandleFunc("/aacfree", siteHandler)
+	http.HandleFunc("/"+testUrlPath, siteHandler)
+	http.HandleFunc("/"+aacUrlPath, siteHandler)
 
 	siteMap = make(map[string]rssSiter)
-	siteMapAdd("test", &test)
-	siteMapAdd("aacfree", &aacfree)
+	siteMapAdd(testUrlPath, &test)
+	siteMapAdd(aacUrlPath, &aacfree)
 
 	port := ":2888"
 	clog.Printf("start listen at %v ...\n", port)
